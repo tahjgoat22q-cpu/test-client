@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Keep-Alive Heartbeat",
+      "type": "shell",
+      "command": "while true; do printf '\033[2K\r🟢 Active | $(date +\"%I:%M:%S %p\") - Codespace kept awake'; sleep 60; done",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
