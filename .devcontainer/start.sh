@@ -1,7 +1,7 @@
 #!/bin/bash
 nohup bash -c 'while true; do touch /workspaces/test-client/.keepalive; sleep 240; done' >/dev/null 2>&1 &
 
-# Start or run Firefox container
+# Launch Firefox container
 if ! docker start firefox 2>/dev/null; then
   docker run -d \
     --name=firefox \
@@ -27,7 +27,7 @@ sleep 2
 # Disable stuck key repeats
 docker exec firefox bash -c "export DISPLAY=:1; xset -r 2>/dev/null || (export DISPLAY=:0; xset -r)" 2>/dev/null
 
-# Patch Selkies web interface to force optimal side-menu settings on open
+# Patch Selkies web interface for auto-settings
 docker exec -u 0 firefox bash -c '
   for html in $(find /usr/share/selkies -name "index.html" 2>/dev/null); do
     if ! grep -q "auto-speed-patch" "$html"; then
@@ -43,4 +43,4 @@ docker exec -u 0 firefox bash -c '
   fi
 ' 2>/dev/null
 
-echo "Firefox startup complete."
+echo "Firefox is running."
