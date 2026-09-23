@@ -1,7 +1,7 @@
 #!/bin/bash
 nohup bash -c 'while true; do touch /workspaces/test-client/.keepalive; sleep 240; done' >/dev/null 2>&1 &
 
-# Launch Firefox container
+# Start or run Firefox container
 if ! docker start firefox 2>/dev/null; then
   docker run -d \
     --name=firefox \
