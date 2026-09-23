@@ -1,6 +1,9 @@
 #!/bin/bash
 nohup bash -c 'while true; do touch /workspaces/test-client/.keepalive; sleep 240; done' >/dev/null 2>&1 &
 
+# Ensure Chromium is always killed if it ever tries to spawn
+docker rm -f chromium 2>/dev/null
+
 # Start or run Firefox container
 if ! docker start firefox 2>/dev/null; then
   docker run -d \
@@ -43,4 +46,4 @@ docker exec -u 0 firefox bash -c '
   fi
 ' 2>/dev/null
 
-echo "Firefox is running."
+echo "Firefox startup complete."
