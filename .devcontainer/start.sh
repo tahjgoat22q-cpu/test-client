@@ -1,10 +1,11 @@
 #!/bin/bash
+# Prevent sleep
 nohup bash -c 'while true; do touch /workspaces/test-client/.keepalive; sleep 240; done' >/dev/null 2>&1 &
 
-# Ensure Chromium is always killed if it ever tries to spawn
+# Ensure chromium is dead
 docker rm -f chromium 2>/dev/null
 
-# Start or run Firefox container
+# Launch Firefox
 if ! docker start firefox 2>/dev/null; then
   docker run -d \
     --name=firefox \
@@ -30,15 +31,6 @@ sleep 2
 # Disable stuck key repeats
 docker exec firefox bash -c "export DISPLAY=:1; xset -r 2>/dev/null || (export DISPLAY=:0; xset -r)" 2>/dev/null
 
-# Patch Selkies web interface for auto-settings
-docker exec -u 0 firefox bash -c '
-  for html in $(find /usr/share/selkies -name "index.html" 2>/dev/null); do
-    if ! grep -q "auto-speed-patch" "$html"; then
-      sed -i "s|</head>|<script id=\"auto-speed-patch\">window.addEventListener(\"load\",()=>{setTimeout(()=>{try{localStorage.setItem(\"use_css_cursors\",\"true\");localStorage.setItem(\"hidpi\",\"false\");localStorage.setItem(\"use_paint_overs\",\"false\");localStorage.setItem(\"anti_aliasing\",\"false\");localStorage.setItem(\"crf\",\"28\");}catch(e){}},500);});</script></head>|g" "$html"
-    fi
-  done
-' 2>/dev/null
-
 # Install color emojis if missing
 docker exec -u 0 firefox bash -c '
   if ! fc-list : family | grep -qi "emoji"; then
@@ -46,4 +38,4 @@ docker exec -u 0 firefox bash -c '
   fi
 ' 2>/dev/null
 
-echo "Firefox startup complete."
+echo "Firefox is running."
