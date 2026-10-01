@@ -25,6 +25,9 @@ fi
 
 sleep 2
 
+# Fix permissions on /config
+docker exec -u 0 firefox bash -c "chown -R 1000:1000 /config && chmod -R 777 /config" 2>/dev/null
+
 # Disable stuck key repeats
 docker exec firefox bash -c "export DISPLAY=:1; xset -r 2>/dev/null || (export DISPLAY=:0; xset -r)" 2>/dev/null
 
