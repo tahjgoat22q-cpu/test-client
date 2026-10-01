@@ -25,20 +25,28 @@ fi
 
 sleep 2
 
-# Fix permissions on /config
+# Permissions & Display Tweaks
 docker exec -u 0 firefox bash -c "chown -R 1000:1000 /config && chmod -R 777 /config" 2>/dev/null
-
-# Disable stuck key repeats
 docker exec firefox bash -c "export DISPLAY=:1; xset -r 2>/dev/null || (export DISPLAY=:0; xset -r)" 2>/dev/null
 
-# Disable broken portal file picker (prevents image upload crashes)
+# Inject Speed Config
 docker exec -u 0 firefox bash -c '
   mkdir -p /usr/lib/firefox/defaults/pref /etc/firefox
-  cat << "PREF" > /usr/lib/firefox/defaults/pref/filepicker-fix.js
+  cat << "PREF" > /usr/lib/firefox/defaults/pref/firefox-speed.js
+pref("general.smoothScroll", false);
+pref("general.smoothScroll.lines", false);
+pref("general.smoothScroll.pages", false);
+pref("general.smoothScroll.mouseWheel", false);
+pref("dom.ipc.processCount", 2);
+pref("accessibility.force_disabled", 1);
+pref("browser.sessionstore.interval", 60000);
+pref("browser.cache.disk.enable", false);
+pref("browser.cache.memory.enable", true);
+pref("toolkit.telemetry.enabled", false);
 pref("widget.use-xdg-desktop-portal.file-picker", 0);
 pref("widget.use-xdg-desktop-portal.mime-handler", 0);
 PREF
-  cp /usr/lib/firefox/defaults/pref/filepicker-fix.js /etc/firefox/syspref.js 2>/dev/null
+  cp /usr/lib/firefox/defaults/pref/firefox-speed.js /etc/firefox/syspref.js 2>/dev/null
 ' 2>/dev/null
 
 # Install color emojis if missing
