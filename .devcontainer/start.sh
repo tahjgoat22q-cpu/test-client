@@ -8,7 +8,7 @@ if ! docker start firefox 2>/dev/null; then
     --name=firefox \
     -e PUID=1000 \
     -e PGID=1000 \
-    -e TZ=Etc/UTC \
+    -e TZ=America/Los_Angeles
     -e SELKIES_USE_CSS_SCALING=true \
     -e SELKIES_USE_CPU=true \
     -e SELKIES_CRF=28 \
