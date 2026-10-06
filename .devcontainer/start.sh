@@ -3,12 +3,13 @@ nohup bash -c 'while true; do touch /workspaces/test-client/.keepalive; sleep 24
 
 docker rm -f chromium 2>/dev/null
 
+# Launch Firefox with Los Angeles timezone
 if ! docker start firefox 2>/dev/null; then
   docker run -d \
     --name=firefox \
     -e PUID=1000 \
     -e PGID=1000 \
-    -e TZ=America/Los_Angeles
+    -e TZ=America/Los_Angeles \
     -e SELKIES_USE_CSS_SCALING=true \
     -e SELKIES_USE_CPU=true \
     -e SELKIES_CRF=28 \
@@ -25,28 +26,27 @@ fi
 
 sleep 2
 
-# Permissions & Display Tweaks
+# Permissions
 docker exec -u 0 firefox bash -c "chown -R 1000:1000 /config && chmod -R 777 /config" 2>/dev/null
+
+# Disable stuck key repeats
 docker exec firefox bash -c "export DISPLAY=:1; xset -r 2>/dev/null || (export DISPLAY=:0; xset -r)" 2>/dev/null
 
-# Inject Speed Config
+# Prevent Firefox from forcing UTC on websites
 docker exec -u 0 firefox bash -c '
   mkdir -p /usr/lib/firefox/defaults/pref /etc/firefox
-  cat << "PREF" > /usr/lib/firefox/defaults/pref/firefox-speed.js
-pref("general.smoothScroll", false);
-pref("general.smoothScroll.lines", false);
-pref("general.smoothScroll.pages", false);
-pref("general.smoothScroll.mouseWheel", false);
-pref("dom.ipc.processCount", 2);
-pref("accessibility.force_disabled", 1);
-pref("browser.sessionstore.interval", 60000);
-pref("browser.cache.disk.enable", false);
-pref("browser.cache.memory.enable", true);
-pref("toolkit.telemetry.enabled", false);
+  cat << "PREF" >> /usr/lib/firefox/defaults/pref/firefox-speed.js
+pref("privacy.resistFingerprinting", false);
 pref("widget.use-xdg-desktop-portal.file-picker", 0);
 pref("widget.use-xdg-desktop-portal.mime-handler", 0);
 PREF
   cp /usr/lib/firefox/defaults/pref/firefox-speed.js /etc/firefox/syspref.js 2>/dev/null
+
+  for dir in /config/.mozilla/firefox/*; do
+    if [ -d "$dir" ]; then
+      echo "user_pref(\"privacy.resistFingerprinting\", false);" >> "$dir/user.js" 2>/dev/null
+    fi
+  done
 ' 2>/dev/null
 
 # Install color emojis if missing
